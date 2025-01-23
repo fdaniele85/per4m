@@ -1,17 +1,9 @@
 #include "ProbabilisticStop.h"
 
 #include <cctype>
-#include <stdexcept>
 #include <algorithm>
 
 namespace ffp {
-    bool icase_compare(std::string_view s1, std::string_view s2) {
-        auto comparator = [](char a, char b) { return std::tolower(a) == std::tolower(b); };
-
-        return (s1.size() == s2.size()) &&
-               std::equal(s1.begin(), s1.end(), s2.begin(), comparator);
-    }
-
     ProbabilisticStop::ProbabilisticStop(double threshold, double improve_pct, Kernel kernel_type, double lb,
                                          int iterations, int number_of_queries)
             : threshold_(threshold),
@@ -43,21 +35,5 @@ namespace ffp {
             estimator_.feed_data(data_);
             fed_ = true;
         }
-    }
-
-    ProbabilisticStop::Kernel ProbabilisticStop::get_kernel(std::string_view kernel) {
-        if (icase_compare(kernel, "gaussian")) {
-            return Kernel::gaussian;
-        }
-
-        if (icase_compare(kernel, "epanechnikov")) {
-            return Kernel::epanechnikov;
-        }
-
-        if (icase_compare(kernel, "uniform")) {
-            return Kernel::uniform;
-        }
-
-        throw std::invalid_argument("Kernel not defined");
     }
 } // namespace ffp
