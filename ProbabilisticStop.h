@@ -4,9 +4,8 @@
 
 #pragma once
 
-#include <mutex>
-#include <vector>
 #include "KDE.h"
+#include <mutex>
 
 namespace ffp {
     class ProbabilisticStop {
@@ -21,26 +20,32 @@ namespace ffp {
         /// \param number_of_queries
         ProbabilisticStop(double threshold, double improve_pct, Kernel kernel_type, double lb, int iterations, int number_of_queries);
 
+        /**
+         * \brief Checks if the stopping criterion is satisfied.
+         *
+         * \return True if the stopping criterion is satisfied, false otherwise.
+         */
         [[nodiscard]] bool stop();
+
+        /**
+         * \brief Adds a new cost value to the data.
+         *
+         * \param cost The cost value to be added.
+         */
         void add(double cost);
 
     private:
+        double threshold_;      ///< The threshold value for the stopping criterion.
+        double improve_pct_;    ///< The percentage improvement required for the stopping criterion.
+        Kernel estimator_type_; ///< The type of kernel estimator used in the KDE.
+        int iterations_;        ///< The number of iterations for updating the probability.
 
+        KDE estimator_; ///< The kernel density estimator used in the stopping criterion.
 
-        double threshold_;
-        double improve_pct_;
-        Kernel estimator_type_;
-        int iterations_;
-        int number_of_queries_;
+        double min_{std::numeric_limits<double>::max()}; ///< The minimum cost value observed.
 
-        [[nodiscard]] double estimate(double num_value) const;
-
-        KDE estimator_;
-
-        double min_{std::numeric_limits<double>::max()};
-
-        std::vector<double> data_;
-        std::mutex mtx_;
-        bool fed_{false};
+        CircularBuffer data_; ///< Circular buffer to store the cost values.
+        std::mutex mtx_;      ///< Mutex for thread-safe operations.
+        bool fed_{false};     ///< Flag indicating whether the data has been fed.
     };
-}
+} // namespace ffp

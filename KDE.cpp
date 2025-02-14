@@ -11,8 +11,7 @@ namespace ffp {
     bool icase_compare(const std::string_view s1, const std::string_view s2) {
         auto comparator = [](const char a, const char b) { return std::tolower(a) == std::tolower(b); };
 
-        return (s1.size() == s2.size()) &&
-               std::equal(s1.begin(), s1.end(), s2.begin(), comparator);
+        return (s1.size() == s2.size()) && std::equal(s1.begin(), s1.end(), s2.begin(), comparator);
     }
 
     double gaussianKernel(double x, double bandwidth) { return exp(-0.5 * pow(x, 2) / pow(bandwidth, 2)) / (sqrt(2 * M_PI) * bandwidth); }
@@ -28,62 +27,71 @@ namespace ffp {
 
     double uniformKernel(double x, double bandwidth) { return (0.5 / bandwidth) * (std::abs(x) <= bandwidth); }
 
-    KDE::KDE(const Kernel kernel_type, const double lb) : kernel_type_(kernel_type), lb_(lb) {
+    KDE::KDE(const Kernel kernel_type, const int size, const int n_queries, const double lb)
+        : kernel_type_(kernel_type),
+          data_(new double[size]),
+          size_(size),
+          x_values_(new double[n_queries]),
+          pdf_values_(new double[n_queries]),
+          kernel_values_(new double[n_queries]),
+          n_queries_(n_queries),
+          lb_(lb) {
         switch (kernel_type_) {
         case Kernel::gaussian: kernel_function_ = &gaussianKernel; break;
         case Kernel::epanechnikov: kernel_function_ = &epanechnikovKernel; break;
-        case Kernel::uniform: kernel_function_ = &uniformKernel; break;
+        default: kernel_function_ = &uniformKernel; break;
         }
     }
 
-    std::vector<double> KDE::kernelDensityEstimate(const std::vector<double> &x_values, const std::vector<double> &data) const {
-        const auto n = data.size();
-        std::vector<double> result(x_values.size(), 0.0);
-        std::vector<double> kernel_values(x_values.size(), 0.0);
+    void KDE::kernelDensityEstimate() const {
+        for (int i = 0; i < n_queries_; ++i) {
+            pdf_values_[i] = 0.0;
+            x_values_[i] = 0.0;
+        }
 
-        for (uint i = 0; i < n; ++i) {
-            for (uint j = 0; j < x_values.size(); ++j) {
-                kernel_values[j] = kernel_function_(x_values[j] - data[i], bandwidth_);
+        for (uint i = 0; i < size_; ++i) {
+            for (uint j = 0; j < n_queries_; ++j) {
+                kernel_values_[j] = kernel_function_(x_values_[j] - data_[i], bandwidth_);
 
-                if (kernel_values[j] > 0) {
-                    result[j] += kernel_values[j] / (static_cast<double>(n) * bandwidth_);
+                if (kernel_values_[j] > 0) {
+                    pdf_values_[j] += kernel_values_[j] / (static_cast<double>(size_) * bandwidth_);
                 }
             }
         }
-        return result;
     }
 
-    void KDE::feed_data(const std::vector<double> &data) {
-        data_ = data;
-
+    void KDE::feed_data(const CircularBuffer &data) {
+        double accumulation = 0.0;
         double sigma = 0.0;
-        const auto n = static_cast<double>(data_.size());
-        const auto accumulation = std::accumulate(data_.begin(), data_.end(), 0.0);
-        for (const double val : data_) {
-            sigma += pow(val - (accumulation / n), 2);
+
+        for (int i = 0; i < size_; ++i) {
+            data_[i] = data[i];
+            accumulation += data[i];
         }
-        sigma = sqrt(sigma / n);
-        bandwidth_ = pow((4 * pow(sigma, 5)) / (3 * n), 0.2);
+
+        for (int i = 0; i < size_; ++i) {
+            sigma += pow(data_[i] - (accumulation / size_), 2);
+        }
+        sigma = sqrt(sigma / size_);
+        bandwidth_ = pow((4 * pow(sigma, 5)) / (3 * size_), 0.2);
     }
 
-    double KDE::cdf(const double x_value, const int n_queries) const {
-        std::vector<double> x_values;
-
+    double KDE::estimate(const double x_value) const {
         double current_val = lb_;
-        const double delta_val = (x_value - lb_) / n_queries;
+        const double delta_val = (x_value - lb_) / n_queries_;
 
-        for (int i = 0; i < n_queries; ++i) {
-            x_values.push_back(current_val);
+        for (int i = 0; i < n_queries_; ++i) {
+            x_values_[i] = current_val;
             current_val += delta_val;
         }
 
         // TODO implementare per la massimizzazione
 
-        const std::vector<double> pdf_values = kernelDensityEstimate(x_values, data_);
+        kernelDensityEstimate();
 
         double cdf_value = 0.0;
-        for (uint i = 1; i < pdf_values.size(); ++i) {
-            cdf_value += 0.5 * (pdf_values[i] + pdf_values[i - 1]) * (x_values[i] - x_values[i - 1]);
+        for (uint i = 1; i < n_queries_; ++i) {
+            cdf_value += 0.5 * (pdf_values_[i] + pdf_values_[i - 1]) * (x_values_[i] - x_values_[i - 1]);
         }
         return cdf_value;
     }
@@ -102,5 +110,12 @@ namespace ffp {
         }
 
         throw std::invalid_argument("Kernel not defined");
+    }
+
+    KDE::~KDE() {
+        delete[] data_;
+        delete[] x_values_;
+        delete[] pdf_values_;
+        delete[] kernel_values_;
     }
 } // namespace ffp

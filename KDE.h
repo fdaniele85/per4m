@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include <algorithm>
+#include <functional>
 #include <string_view>
-#include <vector>
+#include "CircularBuffer.h"
 
 namespace ffp {
     /**
@@ -35,40 +35,45 @@ namespace ffp {
         /**
          * @brief Constructor for KDE.
          * @param kernel_type The type of kernel to use.
+         * @param size The size of the data that will be fed to the KDE.
+         * @param n_queries The number of queries to use in the computation.
          * @param lb The lower bound for the data (default is 0).
          */
-        explicit KDE(Kernel kernel_type, double lb = 0);
+        explicit KDE(Kernel kernel_type, int size, int n_queries, double lb = 0);
+
+        /// @brief Destructor for KDE.
+        ~KDE();
 
         /**
          * @brief Feeds data to the KDE.
-         * @param data A vector of data points.
+         * @param data Data points.
          */
-        void feed_data(const std::vector<double> &data);
+        void feed_data(const CircularBuffer &data);
+
+        /// @brief Estimates the kernel density for given x values.
+        void kernelDensityEstimate() const;
 
         /**
-         * @brief Estimates the kernel density for given x values.
-         * @param x_values A vector of x values where the density is estimated.
-         * @param data A vector of data points.
-         * @return A vector of estimated density.
-         */
-        [[nodiscard]] std::vector<double> kernelDensityEstimate(const std::vector<double> &x_values, const std::vector<double> &data) const;
-
-        /**
-         * @brief Computes the cumulative distribution function (CDF) for a given x value.
+         * @brief Estimates the cumulative distribution function (CDF) for a given x value.
          * @param x_value The x value for which the CDF is computed.
-         * @param n_queries The number of queries to use in the computation.
          * @return The CDF value.
          */
-        [[nodiscard]] double cdf(double x_value, int n_queries) const;
+        [[nodiscard]] double estimate(double x_value) const;
 
     private:
         double bandwidth_{0.5};                    ///< Bandwidth for the kernel.
         Kernel kernel_type_{Kernel::epanechnikov}; ///< Type of kernel used.
 
-        // TODO: Usare std::queue per mantenere solo gli ultimi n_sample valori e stimare sempre su quelli?
-        std::vector<double> data_; ///< Data points for KDE.
+        double *data_; ///< Data points for KDE.
+        int size_;     ///< Size of the data.
+
+        double *x_values_; ///< X values for the KDE.
+        double *pdf_values_;  ///< Result of the KDE.
+        double *kernel_values_; ///< Kernel values for the KDE.
+        int n_queries_;    ///< Number of queries.
+
         double lb_;                ///< Lower bound for the data.
 
-        std::function<double(double, double)> kernel_function_; ///< Kernel function.
+        std::function<double(double, double)> kernel_function_{}; ///< Kernel function.
     };
 } // namespace ffp
