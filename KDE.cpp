@@ -46,7 +46,7 @@ namespace ffp {
     void KDE::kernelDensityEstimate() const {
         for (int i = 0; i < n_queries_; ++i) {
             pdf_values_[i] = 0.0;
-            x_values_[i] = 0.0;
+            kernel_values_[i] = 0.0;
         }
 
         for (uint i = 0; i < size_; ++i) {
