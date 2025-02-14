@@ -22,5 +22,5 @@ namespace ffp {
 
     bool CircularBuffer::full() const { return last_ == capacity_; }
 
-    double CircularBuffer::operator[](const size_t index) const { return data_[index]; }
+    double CircularBuffer::operator[](const unsigned int index) const { return data_[index]; }
 } // namespace ffp

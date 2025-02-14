@@ -71,7 +71,7 @@ namespace ffp {
          * \param index The index of the element to access.
          * \return The value of the element at the specified index.
          */
-        [[nodiscard]] double operator[](size_t index) const;
+        [[nodiscard]] double operator[](unsigned int index) const;
 
     private:
         int capacity_{0}; ///< The maximum capacity of the buffer.
