@@ -2,9 +2,8 @@
 // Created by Tommaso on 27/03/2024.
 //
 
-#include "KDE.h"
+#include <per4m/KDE.h>
 #include <cmath>
-#include <numeric>
 #include <stdexcept>
 
 namespace ffp {

@@ -1,0 +1,5 @@
+@PACKAGE_INIT@
+
+set(PER4M_VERSION_STRING "@PER4M_VERSION_STRING@")
+
+include("${CMAKE_CURRENT_LIST_DIR}/per4mTargets.cmake")

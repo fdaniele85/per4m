@@ -4,9 +4,9 @@
 
 #pragma once
 
+#include "CircularBuffer.h"
 #include <functional>
 #include <string_view>
-#include "CircularBuffer.h"
 
 namespace ffp {
     /**

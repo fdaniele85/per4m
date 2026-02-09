@@ -1,4 +1,4 @@
-#include "ProbabilisticStop.h"
+#include <per4m/ProbabilisticStop.h>
 
 #include <algorithm>
 #include <cctype>

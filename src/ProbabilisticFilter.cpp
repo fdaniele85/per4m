@@ -1,4 +1,4 @@
-#include "ProbabilisticFilter.h"
+#include <per4m/ProbabilisticFilter.h>
 
 namespace ffp {
     ProbabilisticFilter::ProbabilisticFilter(const double threshold, const Kernel kernel_type, const int iterations, const int number_of_queries)

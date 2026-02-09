@@ -2,7 +2,7 @@
 // Created by daniele on 14/02/25.
 //
 
-#include "CircularBuffer.h"
+#include <per4m/CircularBuffer.h>
 
 namespace ffp {
     CircularBuffer::CircularBuffer(int capacity) : capacity_(capacity), data_(new double[capacity]) {}
