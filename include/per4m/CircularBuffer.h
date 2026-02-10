@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <cstddef>
+
 namespace ffp {
 
     /**
@@ -11,12 +13,13 @@ namespace ffp {
      */
     class CircularBuffer {
     public:
+        using size_type = std::size_t;
         /**
          * \brief Constructs a CircularBuffer with the specified capacity.
          *
          * \param capacity The maximum number of elements the buffer can hold.
          */
-        explicit CircularBuffer(int capacity);
+        explicit CircularBuffer(size_type capacity);
 
         /**
          * \brief Destroys the CircularBuffer object.
@@ -50,6 +53,7 @@ namespace ffp {
          * \return A constant pointer to the first element in the buffer.
          */
         [[nodiscard]] const double *cbegin() const;
+        [[nodiscard]] const double *begin() const;
 
         /**
          * \brief Returns a constant pointer to the end of the buffer.
@@ -57,6 +61,7 @@ namespace ffp {
          * \return A constant pointer to the element following the last element in the buffer.
          */
         [[nodiscard]] const double *cend() const;
+        [[nodiscard]] const double *end() const;
 
         /**
          * \brief Checks if the buffer is full.
@@ -71,11 +76,11 @@ namespace ffp {
          * \param index The index of the element to access.
          * \return The value of the element at the specified index.
          */
-        [[nodiscard]] double operator[](unsigned int index) const;
+        [[nodiscard]] double operator[](size_type index) const;
 
     private:
-        int capacity_{0}; ///< The maximum capacity of the buffer.
-        int last_{0};     ///< The index of the last element in the buffer.
+        size_type capacity_{0}; ///< The maximum capacity of the buffer.
+        size_type last_{0};     ///< The index of the last element in the buffer.
         double *data_;    ///< Pointer to the buffer's data array.
     };
 
