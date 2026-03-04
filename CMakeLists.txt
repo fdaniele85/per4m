@@ -27,13 +27,20 @@ project(per4m
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
+option(PER4M_THREAD_SAFE "Enable thread-safe mode in per4m (mutex/lock_guard enabled)" OFF)
+
 add_library(per4m
         src/ProbabilisticStop.cpp
         src/KDE.cpp
         src/ProbabilisticFilter.cpp
         src/CircularBuffer.cpp
         src/Bandwidth.cpp
+        src/Ribeiro.cpp
 )
+
+if (PER4M_THREAD_SAFE)
+        target_compile_definitions(per4m PRIVATE PER4M_THREAD_SAFE)
+endif()
 
 add_library(per4m::per4m ALIAS per4m)
 

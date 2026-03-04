@@ -5,7 +5,11 @@
 #pragma once
 
 #include "KDE.h"
+#include <limits>
+#ifdef PER4M_THREAD_SAFE
 #include <mutex>
+#endif
+
 
 namespace per4m {
     class ProbabilisticStop {
@@ -45,7 +49,9 @@ namespace per4m {
         double min_{std::numeric_limits<double>::max()}; ///< The minimum cost value observed.
 
         CircularBuffer data_; ///< Circular buffer to store the cost values.
+#ifdef PER4M_THREAD_SAFE
         std::mutex mtx_;      ///< Mutex for thread-safe operations.
+#endif
         bool fed_{false};     ///< Flag indicating whether the data has been fed.
     };
 } // namespace ffp
