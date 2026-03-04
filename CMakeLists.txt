@@ -44,20 +44,20 @@ endif()
 
 add_library(per4m::per4m ALIAS per4m)
 
-find_package(FFTW3 QUIET)
-
-if (FFTW3_FOUND)
-        message(STATUS "Found FFTW3 via find_package")
-        target_link_libraries(per4m PUBLIC FFTW3::FFTW3)
-        target_compile_definitions(per4m PUBLIC PER4M_USE_FFTW)
-else()
+#find_package(FFTW3 QUIET)
+#
+#if (FFTW3_FOUND)
+#        message(STATUS "Found FFTW3 via find_package")
+#        target_link_libraries(per4m PUBLIC FFTW3::FFTW3)
+#        target_compile_definitions(per4m PUBLIC PER4M_USE_FFTW)
+#else()
         find_package(PkgConfig REQUIRED)
         pkg_check_modules(FFTW3 REQUIRED IMPORTED_TARGET fftw3)
 
         message(STATUS "Found FFTW3 via pkg-config")
         target_link_libraries(per4m PUBLIC PkgConfig::FFTW3)
         target_compile_definitions(per4m PUBLIC PER4M_USE_FFTW)
-endif()
+#endif()
 
 target_compile_features(per4m PUBLIC cxx_std_20)
 
