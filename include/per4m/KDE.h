@@ -21,8 +21,10 @@ namespace per4m {
 
     enum class BandwidthType {
         silverman, ///< Silverman's rule of thumb for bandwidth selection
-        isj,       ///< Improved Sheather & Jones method for bandwidth selection
-        scott      ///< Scott's rule of thumb for bandwidth selection
+        scott,     ///< Scott's rule of thumb for bandwidth selection
+#ifdef PER4M_USE_FFTW
+        isj       ///< Improved Sheather & Jones method for bandwidth selection
+#endif
     };
 
     /**

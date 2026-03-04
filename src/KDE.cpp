@@ -64,6 +64,7 @@ namespace per4m {
     void KDE::feed_data(const CircularBuffer &data) {
         std::copy(data.begin(), data.end(), data_.begin());
 
+#ifdef PER4M_USE_FFTW
         if (bandwith_type_ == BandwidthType::silverman) {
             bandwidth_ = Bandwidth::silverman_1d(data_);
         } else {
@@ -74,7 +75,9 @@ namespace per4m {
             }
             bandwidth_ = Bandwidth::isj_1d(dati);
         }
-        std::cerr << "Bandwidth: " << bandwidth_ << std::endl;
+#else
+        bandwidth_ = Bandwidth::silverman_1d(data_);
+#endif
     }
 
     double KDE::estimate(const double x_value) {

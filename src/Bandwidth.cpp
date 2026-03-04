@@ -148,29 +148,6 @@ namespace per4m {
             return bins;
         }
 
-        // ---------- FFTW DCT-II wrapper ----------
-        // SciPy fftpack.dct(x) default: type=2, norm=None (non normalizzata).
-        // FFTW: REDFT10 = DCT-II (non normalizzata) con convenzione compatibile.
-        std::vector<double> dct_type2_fftw(const std::vector<double> &in) {
-            const int n = (int)in.size();
-            std::vector<double> out(n);
-
-            // FFTW richiede buffer mutabili
-            std::vector<double> tmp_in = in;
-
-            fftw_plan plan = fftw_plan_r2r_1d(n, tmp_in.data(), out.data(),
-                                              FFTW_REDFT10, // DCT-II
-                                              FFTW_ESTIMATE);
-
-            if (!plan)
-                throw std::runtime_error("FFTW plan creation failed for DCT-II.");
-
-            fftw_execute(plan);
-            fftw_destroy_plan(plan);
-
-            return out;
-        }
-
         // ---------- ISJ core: fixed point ----------
 
         long double fixed_point(long double t, long double N, const std::vector<long double> &I_sq, const std::vector<long double> &a2) {
@@ -384,6 +361,30 @@ namespace per4m {
         return 1.0;
     }
 
+#ifdef PER4M_USE_FFTW
+    // ---------- FFTW DCT-II wrapper ----------
+    // SciPy fftpack.dct(x) default: type=2, norm=None (non normalizzata).
+    // FFTW: REDFT10 = DCT-II (non normalizzata) con convenzione compatibile.
+    std::vector<double> dct_type2_fftw(const std::vector<double> &in) {
+        const int n = (int)in.size();
+        std::vector<double> out(n);
+
+        // FFTW richiede buffer mutabili
+        std::vector<double> tmp_in = in;
+
+        fftw_plan plan = fftw_plan_r2r_1d(n, tmp_in.data(), out.data(),
+                                          FFTW_REDFT10, // DCT-II
+                                          FFTW_ESTIMATE);
+
+        if (!plan)
+            throw std::runtime_error("FFTW plan creation failed for DCT-II.");
+
+        fftw_execute(plan);
+        fftw_destroy_plan(plan);
+
+        return out;
+    }
+
     double Bandwidth::isj_1d(const std::vector<double> &x, const std::optional<std::vector<double>>& weights) {
         if (x.empty())
             throw std::invalid_argument("isj_1d: empty data");
@@ -460,5 +461,6 @@ namespace per4m {
         const long double bw = sqrtl(t_star) * (long double)R;
         return (double)bw;
     }
+#endif
 
 } // namespace per4m
