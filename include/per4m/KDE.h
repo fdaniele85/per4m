@@ -23,7 +23,7 @@ namespace per4m {
         silverman, ///< Silverman's rule of thumb for bandwidth selection
         scott,     ///< Scott's rule of thumb for bandwidth selection
 #ifdef PER4M_USE_FFTW
-        isj       ///< Improved Sheather & Jones method for bandwidth selection
+        isj ///< Improved Sheather & Jones method for bandwidth selection
 #endif
     };
 
@@ -33,6 +33,12 @@ namespace per4m {
      * @return The corresponding Kernel enumeration value.
      */
     Kernel get_kernel(std::string_view kernel);
+
+    /**
+     * @param bandwidth_type A string view representing the bandwidth selection method.
+     * @return The corresponding BandwidthType enumeration value.
+     */
+    BandwidthType get_bandwidth_type(std::string_view bandwidth_type);
 
     /**
      * @class KDE
@@ -45,9 +51,10 @@ namespace per4m {
          * @param kernel_type The type of kernel to use.
          * @param size The size of the data that will be fed to the KDE.
          * @param n_queries The number of queries to use in the computation.
+         * @param bandwidth_type The method to be used for bandwidth selection.
          * @param lb The lower bound for the data (default is 0).
          */
-        explicit KDE(Kernel kernel_type, int size, int n_queries, double lb = 0);
+        explicit KDE(Kernel kernel_type, int size, int n_queries, BandwidthType bandwidth_type, double lb = 0);
 
         /// @brief Destructor for KDE.
         ~KDE() = default;
@@ -65,25 +72,24 @@ namespace per4m {
          */
         [[nodiscard]] double estimate(double x_value);
 
-        BandwidthType bandwith_type_ { BandwidthType::silverman }; ///< Type of bandwidth selection method used.
-
     private:
-        double bandwidth_{0.5};                    ///< Bandwidth for the kernel.
-        Kernel kernel_type_{Kernel::epanechnikov}; ///< Type of kernel used.
+        double bandwidth_{0.5};                                 ///< Bandwidth for the kernel.
+        Kernel kernel_type_{Kernel::epanechnikov};              ///< Type of kernel used.
+        BandwidthType bandwith_type_{BandwidthType::silverman}; ///< Type of bandwidth selection method used.
 
         std::vector<double> data_; ///< Data points for KDE.
-        int size_;     ///< Size of the data.
+        int size_;                 ///< Size of the data.
 
-        std::vector<double> x_values_; ///< X values for the KDE.
-        std::vector<double> pdf_values_;  ///< Result of the KDE.
+        std::vector<double> x_values_;      ///< X values for the KDE.
+        std::vector<double> pdf_values_;    ///< Result of the KDE.
         std::vector<double> kernel_values_; ///< Kernel values for the KDE.
-        int n_queries_;    ///< Number of queries.
+        int n_queries_;                     ///< Number of queries.
 
-        double lb_;                ///< Lower bound for the data.
+        double lb_; ///< Lower bound for the data.
 
         std::function<double(double, double)> kernel_function_{}; ///< Kernel function.
 
         /// @brief Estimates the kernel density for given x values.
         void kernelDensityEstimate();
     };
-} // namespace ffp
+} // namespace per4m

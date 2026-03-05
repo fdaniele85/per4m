@@ -28,8 +28,9 @@ namespace per4m {
 
     double uniformKernel(double x, double bandwidth) { return (0.5 / bandwidth) * (std::abs(x) <= bandwidth); }
 
-    KDE::KDE(const Kernel kernel_type, const int size, const int n_queries, const double lb)
+    KDE::KDE(const Kernel kernel_type, const int size, const int n_queries, const BandwidthType bandwidth_type, const double lb)
         : kernel_type_(kernel_type),
+          bandwith_type_(bandwidth_type),
           data_(size),
           size_(size),
           x_values_(n_queries),
@@ -114,5 +115,19 @@ namespace per4m {
         }
 
         throw std::invalid_argument("Kernel not defined");
+    }
+
+    BandwidthType get_bandwidth_type(std::string_view bandwidth_type) {
+        if (icase_compare(bandwidth_type, "silverman")) {
+            return BandwidthType::silverman;
+        }
+
+#ifdef PER4M_USE_FFTW
+        if (icase_compare(bandwidth_type, "isj")) {
+            return BandwidthType::isj;
+        }
+#endif
+
+        throw std::invalid_argument("Bandwidth type not defined");
     }
 } // namespace per4m

@@ -32,7 +32,7 @@ option(PER4M_THREAD_SAFE "Enable thread-safe mode in per4m (mutex/lock_guard ena
 add_library(per4m
         src/ProbabilisticStop.cpp
         src/KDE.cpp
-        src/ProbabilisticFilter.cpp
+#        src/ProbabilisticFilter.cpp
         src/CircularBuffer.cpp
         src/Bandwidth.cpp
         src/Ribeiro.cpp

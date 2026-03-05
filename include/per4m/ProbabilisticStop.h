@@ -22,7 +22,8 @@ namespace per4m {
         /// \param lb lower bound
         /// \param iterations the probability is updated every iterations elements
         /// \param number_of_queries
-        ProbabilisticStop(double threshold, double improve_pct, Kernel kernel_type, double lb, int iterations, int number_of_queries);
+        /// \param bandwith_type the method to be used for bandwidth selection in the KDE
+        ProbabilisticStop(double threshold, double improve_pct, Kernel kernel_type, double lb, int iterations, int number_of_queries, BandwidthType bandwith_type);
 
         /**
          * \brief Checks if the stopping criterion is satisfied.

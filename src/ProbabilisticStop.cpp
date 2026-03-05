@@ -5,12 +5,12 @@
 
 namespace per4m {
     ProbabilisticStop::ProbabilisticStop(const double threshold, const double improve_pct, const Kernel kernel_type, const double lb, const int iterations,
-                                         const int number_of_queries)
+                                         const int number_of_queries, const BandwidthType bandwidth_type)
         : threshold_(threshold),
           improve_pct_(improve_pct),
           estimator_type_(kernel_type),
           iterations_(iterations),
-          estimator_(estimator_type_, iterations, number_of_queries, lb),
+          estimator_(estimator_type_, iterations, number_of_queries, bandwidth_type, lb),
           data_(iterations) {}
 
     bool ProbabilisticStop::stop() {
