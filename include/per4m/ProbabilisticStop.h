@@ -23,18 +23,12 @@ namespace per4m {
         ProbabilisticStop(double threshold, double improve_pct, Kernel kernel_type, double lb, int iterations, int number_of_queries,
                           BandwidthType bandwith_type);
 
-        /**
-         * \brief Checks if the stopping criterion is satisfied.
-         *
-         * \return True if the stopping criterion is satisfied, false otherwise.
-         */
+        /// \brief Checks if the stopping criterion is satisfied.
+        /// \return True if the stopping criterion is satisfied, false otherwise.
         [[nodiscard]] bool stop();
 
-        /**
-         * \brief Adds a new cost value to the data.
-         *
-         * \param cost The cost value to be added.
-         */
+        /// \brief Adds a new cost value to the data.
+        /// \param cost The cost value to be added.
         void add(double cost);
 
     private:
@@ -47,7 +41,7 @@ namespace per4m {
 
         double min_{std::numeric_limits<double>::max()}; ///< The minimum cost value observed.
 
-        CircularBuffer data_; ///< Circular buffer to store the cost values.
+        detail::CircularBuffer data_; ///< Circular buffer to store the cost values.
         detail::Mutex mtx_;   ///< Mutex for thread-safe operations.
         bool fed_{false};     ///< Flag indicating whether the data has been fed.
     };

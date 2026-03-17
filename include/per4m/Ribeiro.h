@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <per4m/CircularBuffer.h>
+#include <per4m/detail/CircularBuffer.h>
 #include <limits>
 #include <tuple>
 #ifdef PER4M_THREAD_SAFE
@@ -15,7 +15,7 @@ namespace ribeiro {
 
     class Ribeiro {
     public:
-        using size_type = per4m::CircularBuffer::size_type;
+        using size_type = per4m::detail::CircularBuffer::size_type;
         /// Constructor
         ///
         /// \param threshold and \param improve_pct  regulate the stopping of the probabilistic stop. If
@@ -36,7 +36,7 @@ namespace ribeiro {
         double ub_;
         size_type iterations_;
         double min_{std::numeric_limits<double>::max()};
-        per4m::CircularBuffer data_;
+        per4m::detail::CircularBuffer data_;
 
         static double phi(double z);
         [[nodiscard]] std::pair<double, double> get_mean_and_std() const;

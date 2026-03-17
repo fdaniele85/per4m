@@ -33,7 +33,6 @@ add_library(per4m
         src/ProbabilisticStop.cpp
         src/KDE.cpp
 #        src/ProbabilisticFilter.cpp
-        src/CircularBuffer.cpp
         src/Bandwidth.cpp
         src/Ribeiro.cpp
 )

@@ -10,36 +10,30 @@
 namespace per4m {
     class ProbabilisticFilter {
     public:
-        /**
-         * \brief Constructs a ProbabilisticFilter object with the specified parameters.
-         *
-         * This constructor initializes the filter with the given threshold, kernel type,
-         * number of iterations, and number of queries.
-         *
-         * \param threshold The threshold value used in the filter.
-         * \param kernel_type The type of kernel estimator used in the filter.
-         * \param iterations The number of iterations for the filter process.
-         * \param number_of_queries The number of queries to estimate the KDE.
-         */
+        /// \brief Constructs a ProbabilisticFilter object with the specified parameters.
+        ///
+        /// This constructor initializes the filter with the given threshold, kernel type,
+        /// number of iterations, and number of queries.
+        ///
+        /// \param threshold The threshold value used in the filter.
+        /// \param kernel_type The type of kernel estimator used in the filter.
+        /// \param iterations The number of iterations for the filter process.
+        /// \param number_of_queries The number of queries to estimate the KDE.
         ProbabilisticFilter(double threshold, Kernel kernel_type, int iterations, int number_of_queries);
 
-        /**
-         * \brief Performs least squares estimation based on the target gap.
-         *
-         * This function performs the least squares estimation using the provided target gap.
-         *
-         * \param target_gap The target gap value for the least squares estimation.
-         * \return True if the estimation is successful, false otherwise.
-         */
+        /// \brief Performs least squares estimation based on the target gap.
+        ///
+        /// This function performs the least squares estimation using the provided target gap.
+        ///
+        /// \param target_gap The target gap value for the least squares estimation.
+        /// \return True if the estimation is successful, false otherwise.
         [[nodiscard]] bool perform_ls(double target_gap);
 
-        /**
-         * \brief Adds a new gap value to the filter.
-         *
-         * This function adds a new gap value to the filter for further processing.
-         *
-         * \param gap The gap value to be added.
-         */
+        /// \brief Adds a new gap value to the filter.
+        ///
+        /// This function adds a new gap value to the filter for further processing.
+        ///
+        /// \param gap The gap value to be added.
         void add(double gap);
 
     private:

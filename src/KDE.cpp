@@ -62,7 +62,7 @@ namespace per4m {
         }
     }
 
-    void KDE::feed_data(const CircularBuffer &data) {
+    void KDE::feed_data(const detail::CircularBuffer &data) {
         std::copy(data.begin(), data.end(), data_.begin());
 
 #ifdef PER4M_USE_FFTW
