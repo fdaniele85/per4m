@@ -21,7 +21,6 @@ namespace per4m {
 
     enum class BandwidthType {
         silverman, ///< Silverman's rule of thumb for bandwidth selection
-        scott,     ///< Scott's rule of thumb for bandwidth selection
 #ifdef PER4M_USE_FFTW
         isj ///< Improved Sheather & Jones method for bandwidth selection
 #endif
@@ -75,7 +74,7 @@ namespace per4m {
     private:
         double bandwidth_{0.5};                                 ///< Bandwidth for the kernel.
         Kernel kernel_type_{Kernel::epanechnikov};              ///< Type of kernel used.
-        BandwidthType bandwith_type_{BandwidthType::silverman}; ///< Type of bandwidth selection method used.
+        BandwidthType bandwidth_type_{BandwidthType::silverman}; ///< Type of bandwidth selection method used.
 
         std::vector<double> data_; ///< Data points for KDE.
         int size_;                 ///< Size of the data.
@@ -90,6 +89,6 @@ namespace per4m {
         std::function<double(double, double)> kernel_function_{}; ///< Kernel function.
 
         /// @brief Estimates the kernel density for given x values.
-        void kernelDensityEstimate();
+        void kernel_density_estimate();
     };
 } // namespace per4m

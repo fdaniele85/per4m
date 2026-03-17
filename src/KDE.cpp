@@ -15,22 +15,22 @@ namespace per4m {
         return (s1.size() == s2.size()) && std::equal(s1.begin(), s1.end(), s2.begin(), comparator);
     }
 
-    double gaussianKernel(double x, double bandwidth) { return exp(-0.5 * pow(x, 2) / pow(bandwidth, 2)) / (sqrt(2 * M_PI) * bandwidth); }
+    double gaussian_kernel(const double x, const double bandwidth) { return exp(-0.5 * pow(x, 2) / pow(bandwidth, 2)) / (sqrt(2 * M_PI) * bandwidth); }
 
-    double epanechnikovKernel(double x, double bandwidth) {
+    double epanechnikov_kernel(const double x, const double bandwidth) {
         const auto base = x / bandwidth;
         if (std::abs(x) <= bandwidth) {
             return (3.0 / 4.0) * (1 - pow(base, 2));
-        } else {
-            return 0;
         }
+
+        return 0;
     }
 
-    double uniformKernel(double x, double bandwidth) { return (0.5 / bandwidth) * (std::abs(x) <= bandwidth); }
+    double uniformKernel(const double x, const double bandwidth) { return (0.5 / bandwidth) * (std::abs(x) <= bandwidth); }
 
     KDE::KDE(const Kernel kernel_type, const int size, const int n_queries, const BandwidthType bandwidth_type, const double lb)
         : kernel_type_(kernel_type),
-          bandwith_type_(bandwidth_type),
+          bandwidth_type_(bandwidth_type),
           data_(size),
           size_(size),
           x_values_(n_queries),
@@ -39,13 +39,13 @@ namespace per4m {
           n_queries_(n_queries),
           lb_(lb) {
         switch (kernel_type_) {
-        case Kernel::gaussian: kernel_function_ = &gaussianKernel; break;
-        case Kernel::epanechnikov: kernel_function_ = &epanechnikovKernel; break;
+        case Kernel::gaussian: kernel_function_ = &gaussian_kernel; break;
+        case Kernel::epanechnikov: kernel_function_ = &epanechnikov_kernel; break;
         default: kernel_function_ = &uniformKernel; break;
         }
     }
 
-    void KDE::kernelDensityEstimate() {
+    void KDE::kernel_density_estimate() {
         for (int i = 0; i < n_queries_; ++i) {
             pdf_values_[i] = 0.0;
             kernel_values_[i] = 0.0;
@@ -66,7 +66,7 @@ namespace per4m {
         std::copy(data.begin(), data.end(), data_.begin());
 
 #ifdef PER4M_USE_FFTW
-        if (bandwith_type_ == BandwidthType::silverman) {
+        if (bandwidth_type_ == BandwidthType::silverman) {
             bandwidth_ = Bandwidth::silverman_1d(data_);
         } else {
             try {
@@ -90,9 +90,7 @@ namespace per4m {
             current_val += delta_val;
         }
 
-        // TODO implementare per la massimizzazione
-
-        kernelDensityEstimate();
+        kernel_density_estimate();
 
         double cdf_value = 0.0;
         for (uint i = 1; i < n_queries_; ++i) {
@@ -101,7 +99,7 @@ namespace per4m {
         return cdf_value;
     }
 
-    Kernel get_kernel(std::string_view kernel) {
+    Kernel get_kernel(const std::string_view kernel) {
         if (icase_compare(kernel, "gaussian")) {
             return Kernel::gaussian;
         }
@@ -117,7 +115,7 @@ namespace per4m {
         throw std::invalid_argument("Kernel not defined");
     }
 
-    BandwidthType get_bandwidth_type(std::string_view bandwidth_type) {
+    BandwidthType get_bandwidth_type(const std::string_view bandwidth_type) {
         if (icase_compare(bandwidth_type, "silverman")) {
             return BandwidthType::silverman;
         }
