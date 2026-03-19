@@ -43,6 +43,7 @@ namespace per4m {
 
         detail::CircularBuffer data_; ///< Circular buffer to store the cost values.
         detail::Mutex mtx_;   ///< Mutex for thread-safe operations.
-        bool fed_{false};     ///< Flag indicating whether the data has been fed.
+
+        double estimation_ {std::numeric_limits<double>::max()}; ///< The current estimation of the probability of improving at least improve_pct.
     };
 } // namespace per4m

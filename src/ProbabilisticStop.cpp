@@ -15,23 +15,24 @@ namespace per4m {
 
     bool ProbabilisticStop::stop() {
         detail::LockGuard _(mtx_);
-
-        if (!fed_) {
-            return false;
-        }
-
-        const double target_val = min_ - (improve_pct_ * min_);
-        return estimator_.estimate(target_val) < threshold_;
+        return estimation_ < threshold_;
     }
 
     void ProbabilisticStop::add(double cost) {
         detail::LockGuard _(mtx_);
 
         data_.add(cost);
-        min_ = std::min(min_, cost);
+        bool updated = false;
+        if (cost < min_) {
+            min_ = cost;
+            updated = true;
+        }
+
         if (data_.full()) {
             estimator_.feed_data(data_);
-            fed_ = true;
+            estimation_ = estimator_.estimate(min_ - (improve_pct_ * min_));
+        } else if (updated) {
+            estimation_ = estimator_.estimate(min_ - (improve_pct_ * min_));
         }
     }
 } // namespace per4m
