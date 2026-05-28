@@ -2,6 +2,25 @@
 
 `kde_stop` is a C++20 library that provides probabilistic stopping utilities based on kernel density estimation (KDE).
 
+## Citation
+
+If you use `kde_stop` in academic work, please cite the paper describing KDE-STOP:
+
+```bibtex
+@article{FeroneFestaPastore2026,
+  title   = {Enhancing optimization algorithms with Kernel Density Estimation: A statistical learning strategy for smarter metaheuristics},
+  volume  = {194},
+  doi     = {10.1016/j.cor.2026.107539},
+  journal = {Computers \& Operations Research},
+  author  = {Ferone, Daniele and Festa, Paola and Pastore, Tommaso},
+  year    = {2026},
+  month   = oct,
+  pages   = {107539}
+}
+```
+
+The article is available at: http://dx.doi.org/10.1016/j.cor.2026.107539
+
 ## Public API
 
 The supported public API currently consists of:
