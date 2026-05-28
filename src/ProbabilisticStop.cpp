@@ -31,8 +31,11 @@ namespace kde_stop {
         if (data_.full()) {
             estimator_.feed_data(data_);
             estimation_ = estimator_.estimate(min_ - (improve_pct_ * min_));
+            first_ = false;
         } else if (updated) {
-            estimation_ = estimator_.estimate(min_ - (improve_pct_ * min_));
+            if (!first_) {
+                estimation_ = estimator_.estimate(min_ - (improve_pct_ * min_));
+            }
         }
     }
 } // namespace per4m

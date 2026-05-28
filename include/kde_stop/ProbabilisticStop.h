@@ -45,5 +45,6 @@ namespace kde_stop {
         detail::Mutex mtx_;   ///< Mutex for thread-safe operations.
 
         double estimation_ {std::numeric_limits<double>::max()}; ///< The current estimation of the probability of improving at least improve_pct.
+        bool first_{true}; ///< First estimation
     };
 } // namespace per4m
