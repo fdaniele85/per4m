@@ -65,7 +65,7 @@ namespace kde_stop {
     void KDE::feed_data(const detail::CircularBuffer &data) {
         std::copy(data.begin(), data.end(), data_.begin());
 
-#ifdef PER4M_USE_FFTW
+#ifdef KDE_STOP_USE_FFTW
         if (bandwidth_type_ == BandwidthType::silverman) {
             bandwidth_ = Bandwidth::silverman_1d(data_);
         } else {
@@ -120,7 +120,7 @@ namespace kde_stop {
             return BandwidthType::silverman;
         }
 
-#ifdef PER4M_USE_FFTW
+#ifdef KDE_STOP_USE_FFTW
         if (icase_compare(bandwidth_type, "isj")) {
             return BandwidthType::isj;
         }
@@ -128,4 +128,4 @@ namespace kde_stop {
 
         throw std::invalid_argument("Bandwidth type not defined");
     }
-} // namespace per4m
+} // namespace kde_stop
