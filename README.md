@@ -91,6 +91,143 @@ Notes:
 - FFTW3 is still required at configure time, so the host system must provide both `pkg-config` and the `fftw3` development package
 - if FFTW3 is not found, CMake configuration still fails because the dependency is `REQUIRED`
 
+## How to integrate probabilistic stopping in an existing algorithm
+
+`kde_stop::ProbabilisticStop` is designed to be added to an existing optimization loop with minimal changes:
+
+1. create one stopper before the main loop
+2. feed it objective values with `add(cost)`
+3. check `stop()` after each meaningful observation
+4. keep your usual deterministic limits, such as time limit or maximum iterations, as hard safeguards
+
+The stopping rule is intended for minimization. It estimates the probability of observing a solution that improves the best value seen so far by at least `improve_pct`. When that estimated probability falls below `threshold`, `stop()` returns `true`.
+
+```cpp
+#include <kde_stop/ProbabilisticStop.h>
+
+kde_stop::ProbabilisticStop stopper(
+    0.01,                              // threshold: stop below 1% improvement probability
+    0.001,                             // improve_pct: require at least 0.1% relative improvement
+    kde_stop::Kernel::gaussian,         // KDE kernel
+    known_objective_lower_bound,        // lower bound on the observed cost scale
+    50,                                // number of recent observations used by the KDE
+    1024,                              // number of CDF integration queries
+    kde_stop::BandwidthType::silverman  // bandwidth rule
+);
+```
+
+Parameter notes:
+
+- `threshold`: smaller values make the criterion more conservative
+- `improve_pct`: the relative improvement worth waiting for, for example `0.001` for 0.1%
+- `known_objective_lower_bound`: a lower bound for the cost values passed to `add`, and below the target values being integrated by the KDE
+- the fifth constructor argument is the sliding window size used by the KDE
+- `number_of_queries` controls the numerical integration resolution; values around `512` to `2048` are a practical starting point
+- `stop()` remains `false` until enough observations have been added to fill the first KDE window
+- the internal improvement target is `best - improve_pct * best`; for the usual relative-improvement interpretation, feed positive minimization costs
+- for maximization, pass a transformed minimization value, for example `-score`, and choose a consistent lower bound for that transformed scale
+
+### Example: GRASP
+
+In a GRASP, each iteration typically builds a randomized solution and improves it with local search. A natural integration point is after local search, where each iteration contributes one locally optimal cost sample.
+
+```cpp
+#include <utility>
+#include <kde_stop/ProbabilisticStop.h>
+
+Solution run_grasp(const Instance& instance, int max_iterations, double lower_bound) {
+    constexpr double stop_probability = 0.01;
+    constexpr double required_improvement = 0.001;
+    constexpr int window_size = 50;
+    constexpr int kde_queries = 1024;
+
+    kde_stop::ProbabilisticStop stopper(
+        stop_probability,
+        required_improvement,
+        kde_stop::Kernel::gaussian,
+        lower_bound,
+        window_size,
+        kde_queries,
+        kde_stop::BandwidthType::silverman
+    );
+
+    Solution best;
+
+    for (int iteration = 0; iteration < max_iterations; ++iteration) {
+        Solution candidate = construct_randomized_solution(instance);
+        candidate = local_search(instance, std::move(candidate));
+
+        const double cost = candidate.cost();
+        if (!best.is_valid() || cost < best.cost()) {
+            best = candidate;
+        }
+
+        stopper.add(cost);
+        if (stopper.stop()) {
+            break;
+        }
+    }
+
+    return best;
+}
+```
+
+This feeds the KDE with the distribution of GRASP iteration outcomes, not only with the incumbent trajectory. That is usually preferable because the best-so-far value is monotone and can quickly become a long plateau.
+
+### Example: ALNS
+
+In an ALNS, the stopper can be checked after each iteration, exactly as in the GRASP example. Feed the objective value produced by the current ALNS step, then stop when the estimated probability of obtaining the required improvement becomes too small.
+
+```cpp
+#include <utility>
+#include <kde_stop/ProbabilisticStop.h>
+
+Solution run_alns(const Instance& instance, int max_iterations, double lower_bound) {
+    constexpr double stop_probability = 0.005;
+    constexpr double required_improvement = 0.0005;
+    constexpr int window_size = 30;
+    constexpr int kde_queries = 1024;
+
+    kde_stop::ProbabilisticStop stopper(
+        stop_probability,
+        required_improvement,
+        kde_stop::Kernel::epanechnikov,
+        lower_bound,
+        window_size,
+        kde_queries,
+        kde_stop::BandwidthType::silverman
+    );
+
+    Solution current = initial_solution(instance);
+    Solution best = current;
+
+    for (int iteration = 0; iteration < max_iterations; ++iteration) {
+        auto destroy = select_destroy_operator();
+        auto repair = select_repair_operator();
+
+        Solution candidate = repair(instance, destroy(instance, current));
+
+        if (accept(candidate, current, iteration)) {
+            current = std::move(candidate);
+        }
+
+        if (current.cost() < best.cost()) {
+            best = current;
+        }
+
+        update_operator_scores(current, best);
+        update_operator_weights();
+
+        stopper.add(current.cost());
+        if (stopper.stop()) {
+            break;
+        }
+    }
+
+    return best;
+}
+```
+
 ## `KDE_STOP_THREAD_SAFE`
 
 The project exposes the CMake option:
@@ -152,4 +289,3 @@ The Doxygen configuration excludes:
 - `include/kde_stop/detail/`
 - `include/kde_stop/ProbabilisticFilter.h`
 - `include/kde_stop/Ribeiro.h`
-
